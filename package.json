@@ -1,0 +1,25 @@
+{
+  "name": "odin-tic-tac-toe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luckie10/odin-tic-tac-toe.git"
+  },
+  "author": "luckie10",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/luckie10/odin-tic-tac-toe/issues"
+  },
+  "homepage": "https://github.com/luckie10/odin-tic-tac-toe#readme",
+  "devDependencies": {
+    "eslint": "^8.20.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1"
+  }
+}
