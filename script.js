@@ -6,35 +6,36 @@ const Properties = (_properties = {}) => ({
   get: (name) => _properties[name],
 });
 
-const Player = (playerName, playerSymbol) => {
+const Player = (playerSymbol) => {
   console.log();
 
   return {
-    ...Properties({ playerName, playerSymbol }),
+    ...Properties({ playerSymbol }),
   };
 };
 
 const Gameboard = (() => {
-  // const board = new Array(9);
-  const board = [
-    'x',
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    'O',
-    'O',
-    undefined,
-    undefined,
-  ];
+  const board = new Array(9);
 
-  return {
-    ...Properties({ board }),
+  const getBoardCell = (index) => board[index];
+
+  const setBoardCell = (index, symbol) => {
+    board[index] = symbol;
   };
+
+  return { getBoardCell, setBoardCell };
 })();
 
 const DisplayController = (() => {
+  const playerOne = Player('X');
+  const playerTwo = Player('O');
+  let activePlayer = playerOne;
+
   const cells = document.querySelectorAll('button.cell');
+
+  const toggleActivePlayer = () => {
+    activePlayer = activePlayer === playerOne ? playerTwo : playerOne;
+  };
 
   const clear = () => {
     cells.forEach((cell) => {
@@ -45,14 +46,31 @@ const DisplayController = (() => {
   const render = () => {
     clear();
 
-    const board = Gameboard.get('board');
-
     cells.forEach((cell, index) => {
-      cell.textContent = board[index];
+      const cellContents = Gameboard.getBoardCell(index);
+      if (cellContents) {
+        cell.textContent = cellContents;
+        cell.setAttribute('disabled', '');
+      }
     });
   };
 
+  const setMark = (index) => {
+    const symbol = activePlayer.get('playerSymbol');
+    Gameboard.setBoardCell(index, symbol);
+    toggleActivePlayer();
+
+    render();
+  };
+
+  // init
+  // ####
+
   render();
+
+  cells.forEach((cell, index) =>
+    cell.addEventListener('click', (event) => setMark(index))
+  );
 
   return {};
 })();
