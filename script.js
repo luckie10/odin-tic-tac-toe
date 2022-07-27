@@ -27,7 +27,7 @@ const Gameboard = (() => {
 
   const clearGameboard = () => {
     for (let i = 0; i < board.length; i += 1) {
-      board[i] = null;
+      board[i] = undefined;
     }
   };
 
@@ -46,6 +46,7 @@ const DisplayController = (() => {
 
   const cells = document.querySelectorAll('button.cell');
   const restartButton = document.querySelector('button.restart');
+  const messageBox = document.querySelector('.message');
 
   const checkMatchingElements = (array) =>
     array.every((element) => element === 'X') ||
@@ -95,7 +96,7 @@ const DisplayController = (() => {
 
   const checkWin = () => checkRows() || checkColumns() || checkDiagonal();
 
-  const checkDraw = () => !Gameboard.getGameboard().includes(undefined);
+  const checkDraw = () => !Gameboard.getGameboard().includes(undefined)
 
   const toggleActivePlayer = () => {
     activePlayer = activePlayer === playerOne ? playerTwo : playerOne;
@@ -119,17 +120,37 @@ const DisplayController = (() => {
     });
   };
 
+  const displayMessage = (msg) => {
+    messageBox.textContent = msg;
+  };
+
+  const clearMessage = () => {
+    messageBox.textContent = '';
+  };
+
   const restartGame = () => {
     Gameboard.clearGameboard();
+    clearMessage();
     render();
+    cells.forEach((cell) => cell.removeAttribute('disabled'));
+  };
+
+  const endGame = () => {
+    cells.forEach((cell) => cell.setAttribute('disabled', ''));
   };
 
   const setMark = (index) => {
     const symbol = activePlayer.get('playerSymbol');
     Gameboard.setBoardCell(index, symbol);
 
-    if (checkWin()) console.log(activePlayer.get('playerSymbol'), 'wins!!!');
-    if (checkDraw()) console.log('Draw!!!');
+    if (checkWin()) {
+      endGame();
+      displayMessage(`${symbol} wins!!!`);
+    }
+    if (checkDraw()) {
+      endGame();
+      displayMessage('Draw!');
+    }
 
     toggleActivePlayer();
 
