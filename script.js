@@ -25,7 +25,18 @@ const Gameboard = (() => {
     board[index] = symbol;
   };
 
-  return { getBoardCell, getGameboard, setBoardCell };
+  const clearGameboard = () => {
+    for (let i = 0; i < board.length; i += 1) {
+      board[i] = null;
+    }
+  };
+
+  return {
+    getBoardCell,
+    getGameboard,
+    setBoardCell,
+    clearGameboard,
+  };
 })();
 
 const DisplayController = (() => {
@@ -34,6 +45,7 @@ const DisplayController = (() => {
   let activePlayer = playerOne;
 
   const cells = document.querySelectorAll('button.cell');
+  const restartButton = document.querySelector('button.restart');
 
   const checkMatchingElements = (array) =>
     array.every((element) => element === 'X') ||
@@ -107,6 +119,11 @@ const DisplayController = (() => {
     });
   };
 
+  const restartGame = () => {
+    Gameboard.clearGameboard();
+    render();
+  };
+
   const setMark = (index) => {
     const symbol = activePlayer.get('playerSymbol');
     Gameboard.setBoardCell(index, symbol);
@@ -127,6 +144,7 @@ const DisplayController = (() => {
   cells.forEach((cell, index) =>
     cell.addEventListener('click', (event) => setMark(index))
   );
+  restartButton.addEventListener('click', restartGame);
 
   return {};
 })();
