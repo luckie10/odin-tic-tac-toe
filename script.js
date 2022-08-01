@@ -60,7 +60,7 @@ const DisplayController = (() => {
         rowArray.push(Gameboard.getBoardCell(cell));
       }
 
-      if (checkMatchingElements(rowArray)) return true;
+      if (checkMatchingElements(rowArray)) return rowArray[0];
     }
     return false;
   };
@@ -73,7 +73,7 @@ const DisplayController = (() => {
         columnArray.push(Gameboard.getBoardCell(cell));
       }
 
-      if (checkMatchingElements(columnArray)) return true;
+      if (checkMatchingElements(columnArray)) return columnArray[0];
     }
     return false;
   };
@@ -88,15 +88,20 @@ const DisplayController = (() => {
     );
 
     for (let i = 0; i < diagonalGameboardContents.length; i += 1) {
-      if (checkMatchingElements(diagonalGameboardContents[i])) return true;
+      if (checkMatchingElements(diagonalGameboardContents[i]))
+        return diagonalGameboardContents[i][0];
     }
 
     return false;
   };
 
-  const checkWin = () => checkRows() || checkColumns() || checkDiagonal();
+  const checkDraw = () => {
+    if (!Gameboard.getGameboard().includes(undefined)) return 'draw';
+    return false;
+  };
 
-  const checkDraw = () => !Gameboard.getGameboard().includes(undefined)
+  const checkWin = () =>
+    checkRows() || checkColumns() || checkDiagonal() || checkDraw();
 
   const toggleActivePlayer = () => {
     activePlayer = activePlayer === playerOne ? playerTwo : playerOne;
@@ -129,6 +134,7 @@ const DisplayController = (() => {
   };
 
   const restartGame = () => {
+    activePlayer = playerOne;
     Gameboard.clearGameboard();
     clearMessage();
     render();
@@ -143,13 +149,13 @@ const DisplayController = (() => {
     const symbol = activePlayer.get('playerSymbol');
     Gameboard.setBoardCell(index, symbol);
 
-    if (checkWin()) {
+    const result = checkWin();
+    if (result === 'draw') {
       endGame();
-      displayMessage(`${symbol} wins!!!`);
-    }
-    if (checkDraw()) {
+      displayMessage(result);
+    } else if (result) {
       endGame();
-      displayMessage('Draw!');
+      displayMessage(`${checkWin()} wins!!!`);
     }
 
     toggleActivePlayer();
