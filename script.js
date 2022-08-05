@@ -105,8 +105,6 @@ const gameController = (() => {
 })();
 
 const cpuController = (() => {
-  let activePlayer;
-
   const score = {
     X: 1,
     O: -1,
@@ -143,8 +141,6 @@ const cpuController = (() => {
   };
 
   const step = (player, board) => {
-    activePlayer = player;
-
     const maximizing = player.get('playerSymbol') === 'X';
     let bestValue = maximizing ? -Infinity : Infinity;
     let bestMove;
@@ -153,7 +149,6 @@ const cpuController = (() => {
       if (board[i] === undefined) {
         board[i] = player.get('playerSymbol');
         const value = minimax(board, !maximizing);
-        console.log('Index:', i, 'Value:', value);
         board[i] = undefined;
         const evaluator = maximizing ? value > bestValue : value < bestValue;
         if (evaluator) {
@@ -169,6 +164,7 @@ const cpuController = (() => {
   return { step };
 })();
 
+// eslint-disable-next-line no-unused-vars
 const DisplayController = (() => {
   const playerOne = Player('X');
   const playerTwo = Player('O');
@@ -219,39 +215,43 @@ const DisplayController = (() => {
     messageBox.textContent = '';
   };
 
-  const restartGame = () => {
-    activePlayer = playerOne;
-    Gameboard.clearGameboard();
-    clearMessage();
-    render();
-    cells.forEach((cell) => cell.removeAttribute('disabled'));
-  };
-
   const endGame = () => {
     cells.forEach((cell) => cell.setAttribute('disabled', ''));
   };
 
-  const setMark = (index) => {
-    const symbol = activePlayer.get('playerSymbol');
-    Gameboard.setBoardCell(index, symbol);
-
+  const setMark = (humanIndex) => {
     const board = Gameboard.getGameboard();
+    const symbol = activePlayer.get('playerSymbol');
+    const index = activePlayer.get('human')
+      ? humanIndex
+      : cpuController.step(activePlayer, board);
+
+    Gameboard.setBoardCell(index, symbol);
+    render();
+
     const result = gameController.checkWin(board);
     if (result === 'draw') {
       endGame();
       displayMessage(result);
-    } else if (result) {
-      endGame();
-      displayMessage(`${gameController.checkWin(board)} wins!!!`);
+      return;
     }
-
-    render();
+    if (result) {
+      endGame();
+      displayMessage(`${result} wins!!!`);
+      return;
+    }
 
     toggleActivePlayer();
-    if (!activePlayer.get('human')) {
-      const cpuIndex = cpuController.step(activePlayer, board);
-      setMark(cpuIndex);
-    }
+    if (!activePlayer.get('human')) setMark();
+  };
+
+  const restartGame = () => {
+    activePlayer = playerOne;
+    Gameboard.clearGameboard();
+    clearMessage();
+    cells.forEach((cell) => cell.removeAttribute('disabled'));
+    if (!activePlayer.get('human')) setMark();
+    else render();
   };
 
   // init
@@ -260,10 +260,19 @@ const DisplayController = (() => {
   render();
 
   cells.forEach((cell, index) =>
-    cell.addEventListener('click', (event) => setMark(index))
+    cell.addEventListener('click', () => setMark(index))
   );
   restartButton.addEventListener('click', restartGame);
-  xHumanButton.addEventListener('click', toggleHumanButton);
+  xHumanButton.addEventListener('click', (event) => {
+    toggleHumanButton(event);
+    if (!activePlayer.get('human')) {
+      const cpuIndex = cpuController.step(
+        activePlayer,
+        Gameboard.getGameboard()
+      );
+      setMark(cpuIndex);
+    }
+  });
   oHumanButton.addEventListener('click', toggleHumanButton);
 
   return { playerOne, playerTwo };
